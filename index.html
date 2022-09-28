@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>cPanelin ja Github Actions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital@0;1&family=Padauk&family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/style.css">
+  </head>
+  <body>
+    <div class="ulkokeha">
+
+        <section>
+            <div class="leipateksti">
+                <h1>Webhotellin päivitys cPanelin ja Github Actionsin avulla</h1>
+            </div>
+            <div class="marginaali"></div>            
+        </section>
+
+        <section>
+            <div class="leipateksti">
+                <p class="lead">
+                    Tämä opas kertoo kuinka kotisivut voidaan tallentaa webhotellin palvelimelle Github Actionsien avulla 
+                    ja kuinka niiden sisältöä päivitetään samaa menetelmää käyttäen.
+                </p>
+                <p>
+                    Oppaan esimerkki ei ole “ainoa ja oikea tapa toimia”, vaan on tarkoitettu antamaan suuntaa tämän kaltaisen pulman eteen joutuvalle. 
+                    Kaiken voi tehdä paremmin, mutta jostain on aina aloitettava.
+                </p>
+                <p>
+                    Tehdään siis yksinkertainen kotisivu, joka tallennetaan nähtäville Webhotellin palvelimelle.
+                </p>
+                <p>
+                    Projekti toteutetaan siten, että omalla koneella on työn alla oleva sivuston kehitysversio, 
+                    josta sitten projektin edetessä voidaan julkaista palvelimelle nähtäville tuotantoversioita.
+                </p>
+            </div>
+            <div class="marginaali"></div>
+        </section>
+
+        <section class="hideFromSmallScreens">
+            <div class="leipateksti">
+                <p>
+                    Oppaan vasemmassa marginaalissa näytetään muistio, johon työn edessä kerätään myöhemmin tarvittavia tietoja. 
+                    Jos seuraat mukana, niin korvaa esimerkkiarvot omaa tilannettasi paremmin kuvaavilla.
+                </p>
+            </div>
+            <div class="marginaali"></div>            
+        </section>
+
+        <section>
+            <div class="leipateksti">
+                <h2>Lähtöoletukset</h2>
+                <p>Oppaan suorittaminen edellyttää, että:</p>
+                <ul>
+                    <li>käytössäsi on <a href="https://fi.wikipedia.org/wiki/CPanel" target="_blank">cPanelia</a> tukeva Webhotelli</li>
+                    <li>sinulla on <a href="https://github.com/" target="_blank">GitHub-tili</a></li>
+                    <li>koneellesi on asennettu <a href="https://git-scm.com/" target="_blank">Git-versionhallintaohjelmisto</a>.</li>
+                </ul>
+                <p>Mikäli edellytykset ovat kunnossa, lähdetään liikkeelle suorittamalla cPanelissa tarvittavat ennakkovalmistelut.</p>
+            </div>
+            <div class="marginaali">
+
+                <div class="notes">
+                    <p>Muistiinpanot</p>
+                    <ul>
+                        <li><span class="memoLabel">FTP -osoite</span> ftp.tahtisadetta.fi</li>
+                    </ul>
+                </div>
+
+            </div>            
+        </section>
+
+
+        <section>
+
+            <div class="leipateksti">
+                <h2>cPanel</h2>
+
+                <p>Luodaan tätä projektia varten cPanelilla alidomain (subdomain), jonka alle tiedostot tullaan tallentamaan.</p>
+                <p>
+                    cPanelin pääsivun DOMAINS-välilehdeltä löytyy <em>Subdomains-painike</em>. Painike avaa Subdomains näkymän, 
+                    joka sisältää lomakkeen, jonka avulla alidomaineja voidaan lisätä.
+                </p>
+
+                <figure>
+                    <img src="./images/cpanel-DOMAINS.png" alt="cPanel Domains-välilehti" />
+                    <figcaption>cPanel Domains-välilehti.</figcaption>
+                </figure>
+                
+
+                <p>
+                    Lomakkeen Subdomain-kentän avulla määritetään minkä niminen subdomain halutaan lisätä, jonka jälkeen <em>Create-painikkeen</em> 
+                    painallus lisää uuden alidomainin. 
+                </p>
+
+                <figure>
+                    <img src="./images/cpanel-create-subdomain.png" alt="cPanel lisää uusi Subdomain lomake" />
+                    <figcaption>Kuvan esimerkissä luodaan <em>calixtus</em> niminen alidomain ja sijoitetaan alidomainin tiedostot <em>calixtus</em> nimiseen alihakemistoon.</figcaption>
+                </figure>
+
+                <p>Mikäli toimenpide onnistui, ilmaantuu luotu alidomain sivun alalaidassa esitettävään listaan:</p>
+
+                <figure>
+                    <img src="./images/cpanel-create-subdomain-listing.png" alt="cPanel Subdomain listaus" />
+                    <figcaption>cPanel Subdomain listaus.</figcaption>
+                </figure>
+
+                <p>cPanelin pääsivulla FILES-välilehdeltä löytyy <em>Filemanager-painike</em>. Painike avaa tiedostojen hallintaa toimittavan File Manager -näkymän.</p>
+                <figure>
+                    <img src="./images/cpanel-FILES.png" alt="cPanel Files välilehti" />
+                    <figcaption>cPanel Files-välilehti.</figcaption>
+                </figure>
+
+
+
+                <p>Hakemistojen joukkoon on ilmestynyt uusi hakemisto, johon juuri luodun alidomainin sisältö tallennetaan.</p>
+
+                <figure>
+                    <img src="./images/cpanel-filemanager.png" alt="cPanel Filemanager" />
+                    <figcaption>cPanel:in tiedostolistaus</figcaption>
+                </figure>
+
+
+                
+            </div>
+
+            <div class="marginaali">
+
+                <div class="notes">
+                    <p>Muistiinpanot</p>
+                    <ul>
+                        <li><span class="memoLabel">FTP -osoite</span> ftp.tahtisadetta.fi</li>
+                        <li><span class="memoLabel">Subdomain</span> calixtus</li>
+                    </ul>
+                </div>
+            </div>      
+
+        </section>
+
+        <section>
+            <div class="leipateksti">
+                <p>Seuraavaksi luodaan FTP-tunnukset, joiden avulla GitHub:sta käsin voidaan olla yhteydessä Web-palvelimelle.</p>
+
+                <figure>
+                    <img src="./images/cpanel-create-ftpAccountCALIXTUS.png" alt="cPanel FTP -käyttäjätunnuksen luominen" />
+                    <figcaption>Kuvassa lisätään käyttäjälle <em>tiburtius</em> FTP -tili ja oletushakemistoksi asetetaan <em>public_html/calixtus</em>. 
+                        Salasanaa asetettaessa voit pyytää cPanelia luomaan sinulle salasanan. Talleta salasana jonnekkin, 
+                        tarvitset sitä pian kun GitHub:ssa määritetään automaattisen päivityksen edellyttämät FTP -asetukset.</figcaption>
+                </figure>
+
+                <p>
+                    Mikäli tilin luominen onnistuu, ilmestyy luotu tili sivun alalaidassa esitettävää FTP -tilien listaan:
+                </p>
+
+                <figure>
+                    <img src="./images/cpanel-create-ftpAccount-added.png" alt="Lisätty FTP -tunnus näkyy listassa." />
+                    <figcaption>Lisätty FTP -tunnus näkyy listassa.</figcaption>
+                </figure>
+
+                <p>Kopio <em>Log In -sarakkeessa</em> näkyvä <em>käyttäjänimi</em> talteen GitHub asetuksia varten.</p>
+                <p>Webhotellin puolella ollaan nyt valmiita ottamaan sivut vastaan.</p>
+            </div>
+
+            <div class="marginaali">
+
+                <div class="notes">
+                    <p>Muistiinpanot</p>
+                    <ul>
+                        <li><span class="memoLabel">FTP -osoite</span> ftp.tahtisadetta.fi</li>
+                        <li><span class="memoLabel">Subdomain</span> calixtus</li>
+                        <li><span class="memoLabel">Käyttäjä</span> tiburtius@tahtisadetta.fi</li>
+                        <li><span class="memoLabel">Salasana</span> HeyfZcy5eu</li>
+                    </ul>
+                </div>
+
+            </div>    
+
+        </section>
+
+        <section>
+            <div class="leipateksti">
+
+                <h2>GitHub</h2>
+
+                <p>Luodaan uusi GitHub repository.</p>
+
+                <figure>
+                    <img src="./images/github-create-repository.png" alt="Luodaan uusi GitHub repository." />
+                    <figcaption>Lomake, jonka avulla luodaan uusi GitHub repository.</figcaption>
+                </figure>
+
+                <p>
+                    Kuvassa ollaan luomassa GitHub repositorya, jonka nimeksi tulee <em>ajan-lasku</em>. Nimeä valitessa on syytä pitää mielessä, 
+                    että seuraavassa vaiheessa meidän pitää perustaa vastaavan niminen hakemisto omalle koneelle. 
+                    Tätä hakemistoa tullaan käyttämään projektin työhakemistona.
+                </p>
+
+                <p>
+                    Repositoryn luomisen jälkeen aukeaa näkymä, jossa on listattuna vaihtoehtoja, joita uuden repositoryn luomisen yhteydessä 
+                    tyypillisesti tehdään seuraavaksi. 
+                    Kopioidaan vaihtoehdoista <em>..or push an existing repository from the command line</em> talteen myöhempää käyttöä varten.
+                </p>
+
+                <pre>
+    git remote add origin https://github.com/RaimoHaikari/ajan-lasku.git
+    git branch -M main
+    git push -u origin main
+                </pre>
+
+                <p>
+                    <span class="emphasizedText">
+                        Huom! Sinulla ensimmäisellä rivillä oleva sanan origin jälkeen lukeva osuus vastaa sinun luomasi repositoryn nimeä.
+                    </span>
+                </p>
+
+                <p>
+                    Jatketaan edelleen GitHub:in parissa ja valitaan <em>Settings-välilehti</em>. 
+                    Kun aukeavan sivun vasemman laidan valikosta valitaan kohta <em>Secrets</em> ja edelleen alavalinta <em>Actions</em>, aukeaa näkymä, 
+                    jonka kautta voidaan syöttää FTP -päivityksessä tarvittavat tiedot.
+                </p>
+            
+                <figure>
+                    <img src="./images/github-settings-actions-secrets.png" alt="Repositoryn Secrets-asetukset" />
+                    <figcaption>Repositoryn Secrets-asetukset.</figcaption>
+                </figure>
+                
+                <p>Tämä tapahtuu <em>New repository secret-painikkeen</em> avulla.</p>
+
+            </div>
+
+            <div class="marginaali"></div>            
+        </section>
+
+
+        <section>
+            <div class="leipateksti">
+                <p>Talletetaan kolme salaisuutta:</p>
+                <ol>
+                    <li>ftp_server<span class="ml emphasizedText">(Muistiinpanojen FTP -osoite)</span></li>
+                    <li>ftp_name<span class="ml emphasizedText">(Muistiinpanojen Käyttäjä)</span></li>
+                    <li>ftp_password<span class="ml emphasizedText">(Muistiinpanojen Salasana)</span></li>
+                </ol>
+
+                <p>Salaisuudet syötetään yksi kerrallaan.</p>
+
+                <figure>
+                    <img src="./images/github-settings-actions-secrets-add.png" alt="Secrets-asetuksen lisääminen" />
+                    <figcaption>Kuvassa ollaan syöttämässä ftp_server salaisuutta.</figcaption>
+                </figure>
+
+                <p>Kun kaikki kolme salaisuutta on talletettu, sivun alalaidassa pitää sivun alalaidassa näkyä oheisen kaltainen listaus.</p>
+
+                <figure>
+                    <img src="./images/github-settings-actions-secrets-THREE-ADDED.png" alt="Lista tallennetuista salaisuuksista" />
+                    <figcaption>Lista tallennetuista salaisuuksista.</figcaption>
+                </figure>
+
+                <p>Jatketaan omalla koneella suoritettavan osion pariin.</p>
+
+            </div>
+            <div class="marginaali">
+                <div class="notes">
+                    <p>Muistiinpanot</p>
+                    <ul>
+                        <li><span class="memoLabel">FTP -osoite</span> ftp.tahtisadetta.fi</li>
+                        <li><span class="memoLabel">Subdomain</span> calixtus</li>
+                        <li><span class="memoLabel">Käyttäjä</span> tiburtius@tahtisadetta.fi</li>
+                        <li><span class="memoLabel">Salasana</span> HeyfZcy5eu</li>
+                        <li><span class="memoLabel">Repository</span> ajan-lasku</li>
+                    </ul>
+                </div>
+            </div>            
+        </section>
+
+        
+        <section>
+            <div class="leipateksti">
+                <h2>Kehitysversio</h2>
+                <p>
+                    Omalle koneelle luodaan GitHub repositoryn kanssa täsmälleen saman niminen hakemisto. 
+                    Minun tapauksessani alihakemiston nimen pitää olla: <em>ajan-lasku</em>.
+                </p>
+                <pre>
+    mkdir ajan-lasku
+                </pre>
+                <p>
+                    Siirrytään kyseisen kansion sisälle ja tehdään kansiosta Git-projekti:
+                </p>
+                <pre>
+    cd ajan-lasku
+    git init
+                </pre>
+                <p>
+                    Luodaan saman tien index.html tiedosto. Sen sisällöksi voi kopioida vaikka seuraavan koodinpätkän:
+                </p>
+
+                <pre>
+    &lt;!DOCTYPE html&gt;
+    &lt;html lang="en"&gt;
+        &lt;head&gt;
+        &lt;meta charset="UTF-8"&gt;
+        &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+        &lt;meta http-equiv="X-UA-Compatible" content="ie=edge"&gt;
+        &lt;title&gt;Suomalaisten vanha ajanlasku&lt;/title&gt;
+        &lt;/head&gt;
+        &lt;body&gt;
+        &lt;h1&gt;Viikkolaskujärjestelmä&lt;/h1&gt;
+        &lt;p&gt;Vuosi jakaantui kahteen puolikkaaseen, talveen ja kesään.&lt;/p&gt;
+        &lt;ul&gt;
+            &lt;li&gt;Ensimmäinen talvipäivä oli Calixtuksen päivänä 14. lokakuuta&lt;/li&gt;
+            &lt;li&gt;ensimmäinen kesäpäivä oli Tiburtiuksen päivänä huhtikuun 14:ntenä.&lt;/li&gt;
+        &lt;/ul&gt;
+        &lt;/body&gt;
+    &lt;/html&gt;
+                </pre>
+
+                <p>Tämän jälkeen lisätään kaksi hakemistoa: ensiksi <em>.github</em> ja tämän hakemiston sisään: <em>workflows</em></p>
+                <p><em>workflows</em> hakemiston sisään luodaan <em>actions.yml</em> niminen tiedosto. Tässä tiedostossa määritellään toimenpiteet, jotka GitHub:in halutaan suorittavan.</p>
+                <p>actions.yml tiedoston sisällöksi kopioidaan seuraava json -koodi:</p>
+                <pre>
+    on: push
+    name: 🚀 Deploy website on push
+    jobs:
+        web-deploy:
+        name: 🎉 Deploy
+        runs-on: ubuntu-latest
+        steps:
+        - name: 🚚 Get latest code
+            uses: actions/checkout@v2
+        
+        - name: 📂 Sync files
+            uses: SamKirkland/FTP-Deploy-Action@4.3.2
+            with:
+            server: ${{ secrets.ftp_server }}
+            username: ${{ secrets.ftp_name }}
+            password: ${{ secrets.ftp_password }}
+                </pre>
+                <p>
+                    Koodi on peräisin osoitteesta: <a href="https://github.com/marketplace/actions/ftp-deploy" target="_blank">https://github.com/marketplace/actions/ftp-deploy</a>. 
+                    Kyseisellä sivulla esitellään automaattista, FTP:n avulla suoritettavaa päivitystä ja listataan tyypillisten käyttötilanteiden malleja.
+                </p>
+                <p>Huomiota kannattaa kiinnittää koodinpätkän kolmeen viimeiseen riviin:</p>
+                <ul>
+                    <li>secrets.ftp_server</li>
+                    <li>secrets.ftp_name</li>
+                    <li>secrets.ftp_password</li>
+                </ul>
+                <p>
+                    Ne vastaavat GitHub repositoryn luomisen yhteydessä tallennettuja salaisuuksia.
+                </p>
+                 <p>
+                    Projektin juuresta käsi tilanteen pitäisi näyttää suurin piirtein seuraavalta:
+                 </p>
+
+                 <figure>
+                    <img src="./images/myComputer-project-contents.png" alt="Hakemistolistaus projektin juuresta käsin tarkasteltuna" />
+                    <figcaption>Hakemistolistaus projektin juuresta käsin tarkasteltuna.</figcaption>
+                </figure>
+
+                 
+
+
+
+                 <p>Olemme valmiita tallettamaan tehdyt muutokset GitHub-repositoryyn.</p>
+                 <p>Lisätään tehdyt muutokset committiin:</p>
+                 <pre>
+    git add .
+    git commit -m 'Projektin avaus'
+                 </pre>
+
+                 <p>Yhdistetään projekti GitHub repositoryyn:</p>
+
+                 <pre>
+    git remote add origin https://github.com/RaimoHaikari/ajan-lasku.git
+                 </pre>
+
+                 <p><span class="emphasizedText">Sinulla originin jälkeen tulevan osuuden pitää vastaa omaa repositoryasi!</span></p>
+
+                 <p>
+                    Pushataan tehdyt muutokset GitHub:iin:
+                 </p>
+
+                 <pre>
+    git branch -M main
+    git push -u origin main
+                 </pre>
+
+                 <p>Jos kaikki sujui hyvin, niin ensimmäisen päivityksen jälkeen:</p>
+                 <p>GitHub:in Code-välilehti näyttää seuraavan kaltaiselta:</p>
+                 <figure>
+                    <img src="./images/github-CODE-after-first-commit.png" alt="GitHub Code-välilehti ensimmäisen päivityksen jälkeen" />
+                    <figcaption>GitHub Code-välilehti ensimmäisen päivityksen jälkeen.</figcaption>
+                 </figure>
+                 <p>GitHub:in Actions-välilehdellä vallitsee jotakuinkin seuraava tilanne:</p>
+                 <figure>
+                    <img src="./images/github-ACTIONS-after-first-commit.png" alt="GitHub Actions-välilehti ensimmäisen päivityksen jälkeen" />
+                    <figcaption>GitHub Actions-välilehti ensimmäisen päivityksen jälkeen.</figcaption>
+                 </figure>
+                 <p>Luotu kotisivu näkyy cPanel:in tiedostolistauksessa:</p>
+                 <figure>
+                    <img src="./images/cpanel-FILEMANAGER-AFTER-FIRST-commit.png" alt="cPanel tiedostolistaus ensimmäisen päivityksen jälkeen" />
+                    <figcaption>cPanel tiedostolistaus ensimmäisen päivityksen jälkeen.</figcaption>
+                 </figure>
+                 <p>Ja luotu alidomain on valmiina kaiken kansan tarkasteltavaksi:</p>
+                 <figure>
+                    <img src="./images/web-AFTER-FIRST-COMMIT.png" alt="Kotisivut nähtävillä ensimmäisen päivityksen jälkeen" />
+                    <figcaption>Kotisivut nähtävillä ensimmäisen päivityksen jälkeen.</figcaption>
+                 </figure>
+            </div>
+            <div class="marginaali">
+                <div class="notes">
+                    <p>Muistiinpanot</p>
+                    <ul>
+                        <li><span class="memoLabel">FTP -osoite</span> ftp.tahtisadetta.fi</li>
+                        <li><span class="memoLabel">Subdomain</span> calixtus</li>
+                        <li><span class="memoLabel">Käyttäjä</span> tiburtius@tahtisadetta.fi</li>
+                        <li><span class="memoLabel">Salasana</span> HeyfZcy5eu</li>
+                        <li><span class="memoLabel">Repository</span> ajan-lasku</li>
+                    </ul>
+                </div>
+            </div>            
+        </section>
+    
+        
+        <section>
+            <div class="leipateksti">
+                <h2>Loppusanat</h2>
+                <p>Kun latu on saatu avattua, niin kehitysversiossa tehdyt muutokset saadaan nyt helposti päivitettyä kotisivuille.</p>
+                <p>Tällöin riittävät seuraavat Git-käskyt:</p>
+                <pre>
+    git add .
+    git commit -m 'Kuvaus tehdyistä muutoksista'
+    git push -u origin main
+                </pre>
+                <p>
+                    Joka ainoaa muutosta ei tietenkään kannata erikseen päivittää nähtäville, vaan päivityksiä on järkevämpää hoitaa paketteina, 
+                    joissa on koottu yhteen mielekkäitä kokonaisuuksia. Seuraavaksi kannattaakin ottaa selvää 
+                    versionhallinnan <a href="https://www.w3schools.com/git/git_branch.asp" target="_blank">branch-ominaisuudesta</a> 
+                    ja siitä kuinka tätä ominaisuutta voidaan hyödyntää GitHub Actionseja koostettaessa.
+                </p>
+            </div>
+            <div class="marginaali"></div>            
+        </section>
+    
+
+
+    </div>
+    
+  </body>
+</html>
